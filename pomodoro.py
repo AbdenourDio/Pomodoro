@@ -10,45 +10,51 @@ RED = "#E50046"
 WHITE = "#F7F7F7"
 WORKING_TIME = 25
 SHORT_BREAK_TIME = 5
-LONG_BREAK_TIME = 15
+LONG_BREAK_TIME = 30
 timer = None       # TODO: I didn't fully understand why we did this.
 
 window = Tk()
 window.title("Pomodoro")
 window.config(padx=30, pady=10, bg=WHITE)
 
-#repetion tracker
+#trackers
 reps = 0
+start_count_click = 0
 
 # RESET TIMER
 def reset_timer():
-    window.after_cancel(timer)      # TODO: this (timer) is underlined by yellow line why?
+    global start_count_click,reps
+    reps = 0
+    start_count_click = 0
+    window.after_cancel(timer)      
     label.configure(text="Timer",fg=GREEN)
     canvas.itemconfig(timer_text, text="00:00")
     check_mark.configure(text="")
 
-
 # TIMER MECHANISM
 def start_timer():
-    global reps
+    global reps,start_count_click,count_minute,count_second
     reps += 1
-    if reps % 8 in [1,3,5,7]:
-        label.configure(text="Work",fg=GREEN)
-        count_down(WORKING_TIME * 60)
+    start_count_click += 1
+    if (count_minute and count_second) == 0 or start_count_click < 2:
+        if reps % 8 in [1,3,5,7]:
+            label.configure(text="Work",fg=GREEN)
+            count_down(WORKING_TIME * 60)
 
-    elif reps % 8 in [2,4,6]:
-        count_down(SHORT_BREAK_TIME * 60)
-        label.configure(text="Break",fg=PINK)
+        elif reps % 8 in [2,4,6]:
+            count_down(SHORT_BREAK_TIME * 60)
+            label.configure(text="Break",fg=PINK)
 
-    elif reps % 8 == 0:
-        count_down(LONG_BREAK_TIME * 60)
-        label.configure(text="Break",fg=RED)
-
-
+        elif reps % 8 == 0:
+            count_down(LONG_BREAK_TIME * 60)
+            label.configure(text="Break",fg=RED)
+        
+count_second = None
+count_minute = None
 # COUNTDOWN MECHANISM
 mark = ""
 def count_down(count):
-    global mark,timer
+    global mark,timer,count_minute,count_second
     count_minute = math.floor(count / 60)       #TODO: what is the difference between round() and math.floor()??
     count_second = count % 60
     if count_second <= 9:
@@ -62,6 +68,7 @@ def count_down(count):
         if reps % 2 == 0:
             mark += "✔"
             check_mark.config(text=mark)
+
 
 
 
@@ -92,6 +99,7 @@ reset_button.grid(column=2,row=2)
 #work session tracker
 check_mark = Label(fg=GREEN, font=(FONT_NAME,15,"bold"), bg=WHITE)
 check_mark.grid(column=1,row=3)
+
 
 
 
